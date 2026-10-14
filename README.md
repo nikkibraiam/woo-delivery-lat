@@ -36,10 +36,6 @@ Built in 2021 at [Machinesoft](https://machinesoft.tech), my software company, f
     `##urlOrden` (link to the order in wp-admin).
   - Browser push to staff (Firebase Cloud Messaging + service worker).
 
-## Screenshots
-
-> _Coming soon: branch editor with KML coverage, address search map, product branch tab._
-
 ## How it works
 
 ```mermaid
