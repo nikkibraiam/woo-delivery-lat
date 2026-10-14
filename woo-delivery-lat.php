@@ -21,18 +21,18 @@ defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 define( 'WOO_DEL_LAT_FILE', __FILE__ );
 define( 'WOO_DEL_LAT_URL', plugin_dir_url( __FILE__ ) );
 
-require_once "install-woodel-lat.php";
-require_once "admin/load-menu.php";
-require_once "admin/woocommerce-admin.php";
+require_once 'install-woodel-lat.php';
+require_once 'admin/load-menu.php';
+require_once 'admin/woocommerce-admin.php';
 
-require_once "short-code/map-page.php";
-require_once "short-code/store-list-page.php";
+require_once 'short-code/map-page.php';
+require_once 'short-code/store-list-page.php';
 
-require_once "includes/woo-filter-products.php";
-require_once "includes/woo-notification-control.php";
-require_once "includes/ajax-services.php";
+require_once 'includes/woo-filter-products.php';
+require_once 'includes/woo-notification-control.php';
+require_once 'includes/ajax-services.php';
 
-require "admin/services/branch-office-service.php";
-require "admin/services/schedule-service.php";
+require 'admin/services/branch-office-service.php';
+require 'admin/services/schedule-service.php';
 
 register_activation_hook( WOO_DEL_LAT_FILE, 'woodel_install' );
