@@ -1,6 +1,6 @@
 <?php
 	define(
-		'hours_days',
+		'WOO_DEL_LAT_HOURS_DAYS',
 		array(
 			array(
 				'id'   => '00:00:00',

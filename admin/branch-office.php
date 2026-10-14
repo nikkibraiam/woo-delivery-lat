@@ -8,9 +8,9 @@ if ( ! current_user_can( 'manage_options' ) ) {
 	wp_die( 'forbidden' );
 }
 if ( isset( $_GET['delete'] ) ) {
-	if ( $_GET['delete'] == true ) {
+	if ( true == $_GET['delete'] ) {
 		check_admin_referer( 'woo_del_lat_delete_branch_office' );
-		$res = $service->delete( absint( $_GET['id-object'] ) );
+		$res = $service->delete( absint( $_GET['id-object'] ?? 0 ) );
 	}
 }
 
@@ -32,7 +32,7 @@ $result = $service->getList();
 </style>
 
 <?php
-if ( isset( $_GET['edit'] ) && $_GET['edit'] == true ) {
+if ( isset( $_GET['edit'] ) && true == $_GET['edit'] ) {
 	require 'branch-office-manager.php';
 } else {
 	?>
@@ -53,7 +53,7 @@ if ( isset( $_GET['edit'] ) && $_GET['edit'] == true ) {
 	</thead>
 	<tbody>
 	<?php
-	if ( $result != null && sizeof( $result ) > 0 ) {
+	if ( null != $result && count( $result ) > 0 ) {
 		foreach ( $result as $print ) {
 			?>
 				<tr>
@@ -64,7 +64,7 @@ if ( isset( $_GET['edit'] ) && $_GET['edit'] == true ) {
 				<td width='20%'>
 					<a href="admin.php?page=woo-delivery-lat/admin/branch-office.php&edit=true&id-object=<?php echo absint( $print->id ); ?>">
 					<button type='button'>Actualizar</button></a> 
-					<a href="admin.php?page=woo-delivery-lat/admin/branch-office.php&id-object=<?php echo absint( $print->id ); ?>&delete=true&_wpnonce=<?php echo wp_create_nonce( 'woo_del_lat_delete_branch_office' ); ?>">
+					<a href="admin.php?page=woo-delivery-lat/admin/branch-office.php&id-object=<?php echo absint( $print->id ); ?>&delete=true&_wpnonce=<?php echo esc_attr( wp_create_nonce( 'woo_del_lat_delete_branch_office' ) ); ?>">
 					<button type='button'>Eliminar</button></a>
 				</td>
 				</tr>

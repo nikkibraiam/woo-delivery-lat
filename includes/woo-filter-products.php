@@ -4,7 +4,7 @@ defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 function woolat_product_is_visible( $visible, $product_id ) {
 	if ( isset( $_GET['office'] ) || isset( $_COOKIE['woo_del_lat_office'] ) ) {
-		$officeId = absint( $_COOKIE['woo_del_lat_office'] ?? $_GET['office'] );
+		$officeId = absint( $_COOKIE['woo_del_lat_office'] ?? $_GET['office'] ?? 0 );
 		if ( $visible ) {
 			$visible = false;
 			$meta    = get_post_meta( $product_id, 'offices' );
@@ -108,8 +108,8 @@ function cw_change_product_price_cart( $price, $cart_item, $cart_item_key ) {
 
 function woolat_change_price( $price, $product ) {
 	global $metaPos, $posid;
-	$officeId = absint( $_COOKIE['woo_del_lat_office'] ?? $_GET['office'] );
-	if ( $metaPos == null || $posid != $product->id ) {
+	$officeId = absint( $_COOKIE['woo_del_lat_office'] ?? $_GET['office'] ?? 0 );
+	if ( null == $metaPos || $product->id != $posid ) {
 		$posid   = $product->id;
 		$metaPos = get_post_meta( $product->id, 'offices' );
 	}
@@ -130,7 +130,7 @@ function del_lat_woocommerce_before_shop_loop() {
 		$officeId      = absint( $_COOKIE['woo_del_lat_office'] );
 		$officeService = new BranchOfficeService();
 		$office        = $officeId ? $officeService->get( $officeId ) : null;
-		if ( $office != null ) { ?>
+		if ( null != $office ) { ?>
 		<div class="float-office">
 			<div class="close-btn" onclick="closeOffice()">
 			<span class="dashicons dashicons-no"></span>
@@ -142,7 +142,7 @@ function del_lat_woocommerce_before_shop_loop() {
 				</div>
 				<?php
 				if ( isset( $_COOKIE['woo_del_lat_address'] ) ) {
-					$address = sanitize_text_field( wp_unslash( str_replace( '+', ' ', $_COOKIE['woo_del_lat_address'] ) ) );
+					$address = sanitize_text_field( str_replace( '+', ' ', wp_unslash( $_COOKIE['woo_del_lat_address'] ) ) );
 					if ( $address ) {
 						?>
 				<div>Su dirección es <?php echo esc_html( $address ); ?></div>

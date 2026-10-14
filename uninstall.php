@@ -23,7 +23,7 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 		global $wpdb;
 		// Children first because of the foreign keys.
 		foreach ( array( 'wdlat_branch_schedule', 'wdlat_schedules_details', 'wdlat_branch_offices', 'wdlat_schedules' ) as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}$table" );
+			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}$table" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table comes from the fixed list above.
 		}
 		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'woo\\_del\\_lat\\_%' OR option_name = 'woodelat_db_version'" );
 		delete_metadata( 'user', 0, 'woo_del_lat_token', '', true );

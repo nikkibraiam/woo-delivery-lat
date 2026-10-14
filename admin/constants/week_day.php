@@ -1,6 +1,6 @@
 <?php
 	define(
-		'week_days',
+		'WOO_DEL_LAT_WEEK_DAYS',
 		array(
 			array(
 				'id'   => '1',

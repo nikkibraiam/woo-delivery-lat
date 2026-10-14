@@ -11,8 +11,8 @@ function woo_del_lat_payment_complete( $order_id ) {
 		$officeId = absint( $_COOKIE['woo_del_lat_office'] );
 		add_post_meta( $order_id, 'woo_del_lat_office', $officeId );
 		if ( isset( $_COOKIE['woo_del_lat_address'] ) ) {
-			$latitude  = (float) ( $_COOKIE['woo_del_lat_locationlat'] ?? 0 );
-			$longitude = (float) ( $_COOKIE['woo_del_lat_locationlng'] ?? 0 );
+			$latitude  = isset( $_COOKIE['woo_del_lat_locationlat'] ) ? (float) $_COOKIE['woo_del_lat_locationlat'] : 0.0;
+			$longitude = isset( $_COOKIE['woo_del_lat_locationlng'] ) ? (float) $_COOKIE['woo_del_lat_locationlng'] : 0.0;
 			add_post_meta( $order_id, 'woo_del_lat_locationlat', $latitude );
 			add_post_meta( $order_id, 'woo_del_lat_locationlng', $longitude );
 
@@ -55,7 +55,7 @@ function woo_del_lat_payment_complete( $order_id ) {
 
 				$select = "SELECT DISTINCT $wpdb->usermeta.meta_value FROM $wpdb->usermeta WHERE $wpdb->usermeta.meta_key = 'woo_del_lat_token'";
 
-				$tokens = $wpdb->get_results( $select );
+				$tokens = $wpdb->get_results( $select ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- static query on core tables, no user input.
 
 				if ( $tokens ) {
 					foreach ( $tokens as $token ) {
@@ -76,7 +76,7 @@ function sendNotification( $order_id, $officeName, $tokenDestination ) {
 
 	$data = array(
 		'to'           => $tokenDestination,
-		'notification' => json_encode( $message ),
+		'notification' => wp_json_encode( $message ),
 	);
 
 	$headers = array(
@@ -136,6 +136,7 @@ function register_token_user() {
 								var form_data = new FormData();
 								form_data.append('token', currentToken);
 								form_data.append('action', 'woo_delivery_lat_add_token');
+								form_data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'woo_del_lat_token' ) ); ?>');
 									jQuery.ajax({
 										url: '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>',
 										type: 'post',

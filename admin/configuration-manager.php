@@ -2,18 +2,18 @@
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 if ( isset( $_POST['googleKey'] ) && current_user_can( 'manage_options' ) && check_admin_referer( 'woo_del_lat_config' ) ) {
-	update_option( 'woo_del_lat_googleKey', sanitize_text_field( $_POST['googleKey'] ) );
-	update_option( 'woo_del_lat_firebaseApiKey', sanitize_text_field( $_POST['firebaseApiKey'] ) );
-	update_option( 'woo_del_lat_fcmServerKey', sanitize_text_field( $_POST['fcmServerKey'] ) );
-	update_option( 'woo_del_lat_firebaseAuthDomain', sanitize_text_field( $_POST['firebaseAuthDomain'] ?? '' ) );
-	update_option( 'woo_del_lat_firebaseProjectId', sanitize_text_field( $_POST['firebaseProjectId'] ?? '' ) );
-	update_option( 'woo_del_lat_firebaseStorageBucket', sanitize_text_field( $_POST['firebaseStorageBucket'] ?? '' ) );
-	update_option( 'woo_del_lat_firebaseSenderId', sanitize_text_field( $_POST['firebaseSenderId'] ?? '' ) );
-	update_option( 'woo_del_lat_firebaseAppId', sanitize_text_field( $_POST['firebaseAppId'] ?? '' ) );
-	update_option( 'woo_del_lat_firebaseVapidKey', sanitize_text_field( $_POST['firebaseVapidKey'] ?? '' ) );
-	update_option( 'woo_del_lat_notificationEmails', sanitize_text_field( $_POST['notificationEmails'] ) );
+	update_option( 'woo_del_lat_googleKey', sanitize_text_field( wp_unslash( $_POST['googleKey'] ?? '' ) ) );
+	update_option( 'woo_del_lat_firebaseApiKey', sanitize_text_field( wp_unslash( $_POST['firebaseApiKey'] ?? '' ) ) );
+	update_option( 'woo_del_lat_fcmServerKey', sanitize_text_field( wp_unslash( $_POST['fcmServerKey'] ?? '' ) ) );
+	update_option( 'woo_del_lat_firebaseAuthDomain', sanitize_text_field( wp_unslash( $_POST['firebaseAuthDomain'] ?? '' ) ) );
+	update_option( 'woo_del_lat_firebaseProjectId', sanitize_text_field( wp_unslash( $_POST['firebaseProjectId'] ?? '' ) ) );
+	update_option( 'woo_del_lat_firebaseStorageBucket', sanitize_text_field( wp_unslash( $_POST['firebaseStorageBucket'] ?? '' ) ) );
+	update_option( 'woo_del_lat_firebaseSenderId', sanitize_text_field( wp_unslash( $_POST['firebaseSenderId'] ?? '' ) ) );
+	update_option( 'woo_del_lat_firebaseAppId', sanitize_text_field( wp_unslash( $_POST['firebaseAppId'] ?? '' ) ) );
+	update_option( 'woo_del_lat_firebaseVapidKey', sanitize_text_field( wp_unslash( $_POST['firebaseVapidKey'] ?? '' ) ) );
+	update_option( 'woo_del_lat_notificationEmails', sanitize_text_field( wp_unslash( $_POST['notificationEmails'] ?? '' ) ) );
 	update_option( 'woo_del_lat_activeNotification', isset( $_POST['activeNotification'] ) ? 'on' : '' );
-	update_option( 'woo_del_lat_templateEmail', absint( $_POST['templateEmail'] ) );
+	update_option( 'woo_del_lat_templateEmail', absint( $_POST['templateEmail'] ?? 0 ) );
 }
 
 $googleKey             = get_option( 'woo_del_lat_googleKey' );
@@ -144,13 +144,13 @@ $templateList = new WP_Query( $args );
 			<label for="name">Plantilla de correo electrónico de notificación.</label><br>
 			</th>
 			<td>
-			<select name="templateEmail" id="templateEmail" value="<?php echo $templateEmail; ?>">
+			<select name="templateEmail" id="templateEmail" value="<?php echo esc_attr( $templateEmail ); ?>">
 		<?php
 		if ( $templateList->have_posts() ) {
 			while ( $templateList->have_posts() ) {
 				$templateList->the_post();
 				?>
-				<option value="<?php echo get_the_ID(); ?>" <?php echo $templateEmail && $templateEmail == get_the_ID() ? 'selected' : ''; ?>><?php echo esc_html( get_the_title() ); ?></option>
+				<option value="<?php echo absint( get_the_ID() ); ?>" <?php selected( $templateEmail, get_the_ID() ); ?>><?php echo esc_html( get_the_title() ); ?></option>
 				<?php
 			}
 		} else {

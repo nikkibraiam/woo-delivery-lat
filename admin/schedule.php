@@ -8,9 +8,9 @@ if ( ! current_user_can( 'manage_options' ) ) {
 	wp_die( 'forbidden' );
 }
 if ( isset( $_GET['delete'] ) ) {
-	if ( $_GET['delete'] == true ) {
+	if ( true == $_GET['delete'] ) {
 		check_admin_referer( 'woo_del_lat_delete_schedule' );
-		$res = $service->delete( absint( $_GET['id-object'] ) );
+		$res = $service->delete( absint( $_GET['id-object'] ?? 0 ) );
 	}
 }
 
@@ -20,7 +20,7 @@ if ( isset( $_POST ) && count( $_POST ) > 0 ) {
 }
 	$result = $service->getList();
 
-if ( isset( $_GET['edit'] ) && $_GET['edit'] == true ) {
+if ( isset( $_GET['edit'] ) && true == $_GET['edit'] ) {
 	require 'schedule-manager.php';
 } else { ?>
 	
@@ -39,7 +39,7 @@ if ( isset( $_GET['edit'] ) && $_GET['edit'] == true ) {
 		</thead>
 		<tbody>
 		<?php
-		if ( $result != null && sizeof( $result ) > 0 ) {
+		if ( null != $result && count( $result ) > 0 ) {
 			foreach ( $result as $print ) {
 				?>
 					<tr>
@@ -50,7 +50,7 @@ if ( isset( $_GET['edit'] ) && $_GET['edit'] == true ) {
 					<td width='20%'>
 						<a href="admin.php?page=woo-delivery-lat/admin/schedule.php&edit=true&id-object=<?php echo absint( $print->id ); ?>">
 						<button type='button'>Actualizar</button></a> 
-						<a href="admin.php?page=woo-delivery-lat/admin/schedule.php&id-object=<?php echo absint( $print->id ); ?>&delete=true&_wpnonce=<?php echo wp_create_nonce( 'woo_del_lat_delete_schedule' ); ?>">
+						<a href="admin.php?page=woo-delivery-lat/admin/schedule.php&id-object=<?php echo absint( $print->id ); ?>&delete=true&_wpnonce=<?php echo esc_attr( wp_create_nonce( 'woo_del_lat_delete_schedule' ) ); ?>">
 						<button type='button'>Eliminar</button></a>
 					</td>
 					</tr>

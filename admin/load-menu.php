@@ -16,6 +16,8 @@ function wpdocs_register_my_custom_menu_page() {
 add_action( 'admin_menu', 'wpdocs_register_my_custom_menu_page' );
 
 
+// phpcs:disable Universal.Files.SeparateFunctionsFromOO.Mixed -- third-party Sub_menu helper kept next to the menu it registers.
+
 /**
  * Sub menu class
  *

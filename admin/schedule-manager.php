@@ -74,32 +74,32 @@ if ( isset( $_GET['id-object'] ) ) {
 				?>
 			<tr>
 				<td>
-				<input type='hidden' value="<?php echo absint( $detail->id ); ?>" class='det-id' id='details[<?php echo $index; ?>][id]' name='details[<?php echo $index; ?>][id]'/>
-				<select id="details[<?php echo $index; ?>][week_day]" name="details[<?php echo $index; ?>][week_day]" class="det-week_day">
+				<input type='hidden' value="<?php echo absint( $detail->id ); ?>" class='det-id' id='details[<?php echo absint( $index ); ?>][id]' name='details[<?php echo absint( $index ); ?>][id]'/>
+				<select id="details[<?php echo absint( $index ); ?>][week_day]" name="details[<?php echo absint( $index ); ?>][week_day]" class="det-week_day">
 					<option value="">--Seleccione--</option>
-					<?php foreach ( week_days as $item ) { ?>
-					<option value="<?php echo $item['id']; ?>" <?php echo $item['id'] == $detail->week_day ? 'selected' : ''; ?>><?php echo $item['text']; ?></option>
+					<?php foreach ( WOO_DEL_LAT_WEEK_DAYS as $item ) { ?>
+					<option value="<?php echo esc_attr( $item['id'] ); ?>" <?php selected( $item['id'], $detail->week_day ); ?>><?php echo esc_html( $item['text'] ); ?></option>
 					<?php } ?>
 				</select>
 				</td>
 				<td>
-				<select id="details[<?php echo $index; ?>][start_hour]" name="details[<?php echo $index; ?>][start_hour]" class="det-start_hour">
+				<select id="details[<?php echo absint( $index ); ?>][start_hour]" name="details[<?php echo absint( $index ); ?>][start_hour]" class="det-start_hour">
 					<option value="">--Seleccione--</option>
-					<?php foreach ( hours_days as $item ) { ?>
-					<option value="<?php echo $item['id']; ?>" <?php echo $item['id'] == $detail->start_hour ? 'selected' : ''; ?>><?php echo $item['text']; ?></option>
+					<?php foreach ( WOO_DEL_LAT_HOURS_DAYS as $item ) { ?>
+					<option value="<?php echo esc_attr( $item['id'] ); ?>" <?php selected( $item['id'], $detail->start_hour ); ?>><?php echo esc_html( $item['text'] ); ?></option>
 					<?php } ?>
 				</select>
 				</td>
 				<td>
-				<select id="details[<?php echo $index; ?>][end_hour]" name="details[<?php echo $index; ?>][end_hour]" class="det-end_hour">
+				<select id="details[<?php echo absint( $index ); ?>][end_hour]" name="details[<?php echo absint( $index ); ?>][end_hour]" class="det-end_hour">
 					<option value="">--Seleccione--</option>
-					<?php foreach ( hours_days as $item ) { ?>
-					<option value="<?php echo $item['id']; ?>" <?php echo $item['id'] == $detail->end_hour ? 'selected' : ''; ?>><?php echo $item['text']; ?></option>
+					<?php foreach ( WOO_DEL_LAT_HOURS_DAYS as $item ) { ?>
+					<option value="<?php echo esc_attr( $item['id'] ); ?>" <?php selected( $item['id'], $detail->end_hour ); ?>><?php echo esc_html( $item['text'] ); ?></option>
 					<?php } ?>
 				</select>
 				</td>
 				<td>
-				<input type='checkbox' class='det-state' checked id='details[<?php echo $index; ?>][state]' name='details[<?php echo $index; ?>][state]'/>
+				<input type='checkbox' class='det-state' checked id='details[<?php echo absint( $index ); ?>][state]' name='details[<?php echo absint( $index ); ?>][state]'/>
 				</td>
 				<td>
 				<a href='javascript:void(0)' title='Eliminar' onclick='removeDetail(this)' class='button'>Borrar</a>
@@ -118,14 +118,14 @@ if ( isset( $_GET['id-object'] ) ) {
 	</form>
 	<select id="week_day" style="display: none;">
 	<option value="">--Seleccione--</option>
-	<?php foreach ( week_days as $item ) { ?>
-		<option value="<?php echo $item['id']; ?>"><?php echo $item['text']; ?></option>
+	<?php foreach ( WOO_DEL_LAT_WEEK_DAYS as $item ) { ?>
+		<option value="<?php echo esc_attr( $item['id'] ); ?>"><?php echo esc_html( $item['text'] ); ?></option>
 	<?php } ?>
 	</select>
 	<select id="hours_days" style="display: none;">
 	<option value="">--Seleccione--</option>
-	<?php foreach ( hours_days as $item ) { ?>
-		<option value="<?php echo $item['id']; ?>"><?php echo $item['text']; ?></option>
+	<?php foreach ( WOO_DEL_LAT_HOURS_DAYS as $item ) { ?>
+		<option value="<?php echo esc_attr( $item['id'] ); ?>"><?php echo esc_html( $item['text'] ); ?></option>
 	<?php } ?>
 	</select>
 </div>

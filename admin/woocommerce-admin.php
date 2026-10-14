@@ -5,9 +5,14 @@ defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 add_action( 'save_post_product', 'product_published', 10, 3 );
 
 function product_published( $post_id, $post, $update ) {
+	// WooCommerce prints this nonce in the product edit form; reject saves that did not come from it.
+	if ( ! isset( $_POST['woocommerce_meta_nonce'] )
+		|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['woocommerce_meta_nonce'] ) ), 'woocommerce_save_data' ) ) {
+		return;
+	}
 	if ( isset( $_POST['offices'] ) && is_array( $_POST['offices'] ) && current_user_can( 'edit_post', $post_id ) ) {
 		$offices = array();
-		foreach ( wp_unslash( $_POST['offices'] ) as $index => $office ) {
+		foreach ( wp_unslash( $_POST['offices'] ) as $index => $office ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each field is sanitized below.
 			$clean = array(
 				'office_id' => absint( $office['office_id'] ?? 0 ),
 				'price'     => wc_format_decimal( $office['price'] ?? '' ),

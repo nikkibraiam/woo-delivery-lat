@@ -125,8 +125,8 @@ if ( isset( $_GET['id-object'] ) ) {
 			foreach ( $unique->schedules as $index => $schedule ) {
 				?>
 			<li>
-				<input class="sch-id" type="hidden" name="schedules[<?php echo $index; ?>][id]" value="<?php echo absint( $schedule->idmain ); ?>"/>
-				<input class="sch-schedule_id" type="hidden" name="schedules[<?php echo $index; ?>][schedule_id]" value="<?php echo absint( $schedule->id ); ?>"/>
+				<input class="sch-id" type="hidden" name="schedules[<?php echo absint( $index ); ?>][id]" value="<?php echo absint( $schedule->idmain ); ?>"/>
+				<input class="sch-schedule_id" type="hidden" name="schedules[<?php echo absint( $index ); ?>][schedule_id]" value="<?php echo absint( $schedule->id ); ?>"/>
 				<span class="schedule-name"><?php echo esc_html( $schedule->name ); ?></span>
 				<a onclick="removeSchedule(this)"><span class="dashicons dashicons-no-alt"></span></a>
 			</li>
@@ -211,7 +211,7 @@ if ( isset( $_GET['id-object'] ) ) {
 	var form_data = new FormData();
 	form_data.append('file', file_data);
 	form_data.append('action', 'woo_delivery_lat_load_kml');
-	form_data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'woo_del_lat_kml' ); ?>');
+	form_data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'woo_del_lat_kml' ) ); ?>');
 
 	if(jQuery){
 		jQuery.ajax({
