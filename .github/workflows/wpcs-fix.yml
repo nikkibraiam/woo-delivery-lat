@@ -1,0 +1,34 @@
+name: wpcs-fix (temporary)
+
+on:
+  push:
+    branches: [style/wpcs]
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          tools: composer
+      - name: Install WPCS
+        run: |
+          composer global config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+          composer global require --no-interaction wp-coding-standards/wpcs:"^3.0"
+      - name: Report before
+        run: ~/.composer/vendor/bin/phpcs --standard=phpcs.xml.dist --report=json --report-file=before.json -q . || true
+      - name: phpcbf
+        run: ~/.composer/vendor/bin/phpcbf --standard=phpcs.xml.dist -q . || true
+      - name: Report after
+        run: ~/.composer/vendor/bin/phpcs --standard=phpcs.xml.dist --report=json --report-file=after.json -q . || true
+      - name: Patch
+        run: git diff -- . ':!before.json' ':!after.json' > phpcbf.patch; wc -l phpcbf.patch
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wpcs
+          path: |
+            before.json
+            after.json
+            phpcbf.patch
