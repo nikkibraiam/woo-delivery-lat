@@ -158,11 +158,10 @@ function woo_delivery_lat_map_func( $atts ) {
 							<?php
 							foreach ( $office->schedules as $schedule ) {
 								foreach ( $schedule->details as $detail ) {
-
+									?>
+									<div><?php echo esc_html( "Día $detail->week_day desde las $detail->start_hour hasta las $detail->end_hour" ); ?></div>
+									<?php
 								}
-								?>
-								<div><?php echo esc_html( "Día $detail->week_day desde las $detail->start_hour hasta las $detail->end_hour" ); ?></div>
-								<?php
 							}
 						}
 						?>
