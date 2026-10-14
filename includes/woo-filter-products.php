@@ -142,7 +142,7 @@ function del_lat_woocommerce_before_shop_loop() {
 				</div>
 				<?php
 				if ( isset( $_COOKIE['woo_del_lat_address'] ) ) {
-					$address = sanitize_text_field( str_replace( '+', ' ', wp_unslash( $_COOKIE['woo_del_lat_address'] ) ) );
+					$address = trim( str_replace( '+', ' ', sanitize_text_field( wp_unslash( $_COOKIE['woo_del_lat_address'] ) ) ) );
 					if ( $address ) {
 						?>
 				<div>Su dirección es <?php echo esc_html( $address ); ?></div>
