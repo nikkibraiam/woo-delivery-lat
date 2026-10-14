@@ -11,7 +11,7 @@ coverage polygons drawn in Google My Maps), and the shop then shows only
 the products, prices and opening hours of that branch. When the order is
 placed, the branch gets an email and a browser push notification.
 
-Built in 2021 for a restaurant chain in Colombia, so the UI strings are in Spanish.
+Built in 2021 at [Machinesoft](https://machinesoft.tech), my software company, for a restaurant chain in Colombia, so the UI strings are in Spanish.
 
 ## Features
 

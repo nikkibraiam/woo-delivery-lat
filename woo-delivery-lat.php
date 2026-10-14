@@ -4,8 +4,8 @@
  * Plugin URI:        https://github.com/nikkibraiam/woo-delivery-lat
  * Description:       Multi-branch delivery for WooCommerce restaurants: KML coverage zones, store pickup, per-branch prices and schedules, and new-order notifications.
  * Version:           1.0.0
- * Author:            Braiam Patiño
- * Author URI:        https://github.com/nikkibraiam
+ * Author:            Machinesoft (Braiam Patiño)
+ * Author URI:        https://machinesoft.tech
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       woodeliverylat
