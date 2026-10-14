@@ -2,13 +2,23 @@
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
+/**
+ * On the thank-you page: attach the chosen branch and delivery location to the
+ * order, then notify the branch by email (template post) and browser push.
+ */
 function woo_del_lat_payment_complete( $order_id ){
     if(isset($_COOKIE["woo_del_lat_office"])){
-        add_post_meta($order_id, "woo_del_lat_office", $_COOKIE["woo_del_lat_office"]);
+        $officeId = absint($_COOKIE["woo_del_lat_office"]);
+        add_post_meta($order_id, "woo_del_lat_office", $officeId);
         if(isset($_COOKIE["woo_del_lat_address"])){
-            add_post_meta($order_id, "woo_del_lat_office", $_COOKIE["woo_del_lat_office"]);
-            add_post_meta($order_id, "woo_del_lat_locationlat", $_COOKIE["woo_del_lat_locationlat"]);
-            add_post_meta($order_id, "woo_del_lat_locationlng", $_COOKIE["woo_del_lat_locationlng"]);
+            $latitude = (float)($_COOKIE["woo_del_lat_locationlat"] ?? 0);
+            $longitude = (float)($_COOKIE["woo_del_lat_locationlng"] ?? 0);
+            add_post_meta($order_id, "woo_del_lat_locationlat", $latitude);
+            add_post_meta($order_id, "woo_del_lat_locationlng", $longitude);
+
+            $officeService = new BranchOfficeService();
+            $office = $officeService->get($officeId);
+            $officeName = $office ? $office->name : "";
 
             $templateId = get_option("woo_del_lat_templateEmail");
             
@@ -17,22 +27,18 @@ function woo_del_lat_payment_complete( $order_id ){
                 $content = $template->post_content;
                 $content = apply_filters('the_content', $content);
                 
-                if(strpos($content, "##officeName")){
-                    $officeService = new BranchOfficeService();
-                    $office = $officeService->get($_COOKIE["woo_del_lat_office"]);
-                    $content = str_replace("##officeName", $office->name, $content);
+                if(strpos($content, "##officeName") !== false){
+                    $content = str_replace("##officeName", esc_html($officeName), $content);
                 }
-                if(strpos($content, "##urlGoogleDestination")){
-                    $latitude = $_COOKIE["woo_del_lat_locationlat"];
-                    $longitude = $_COOKIE["woo_del_lat_locationlng"];
+                if(strpos($content, "##urlGoogleDestination") !== false){
                     $url = "https://www.google.com/maps/place/$latitude,$longitude";
-                    $content = str_replace("##urlGoogleDestination", $url, $content);
+                    $content = str_replace("##urlGoogleDestination", esc_url($url), $content);
                 }
-                if(strpos($content, "##addressDestination")){
-                    $address = $_COOKIE["woo_del_lat_address"];
-                    $content = str_replace("##addressDestination", $address, $content);
+                if(strpos($content, "##addressDestination") !== false){
+                    $address = sanitize_text_field(wp_unslash($_COOKIE["woo_del_lat_address"]));
+                    $content = str_replace("##addressDestination", esc_html($address), $content);
                 }
-                if(strpos($content, "##urlOrden")){
+                if(strpos($content, "##urlOrden") !== false){
                     $urlOrder = get_site_url()."/wp-admin/post.php?post=$order_id&action=edit";
                     $content = str_replace("##urlOrden", $urlOrder, $content);
                 }
@@ -53,7 +59,7 @@ function woo_del_lat_payment_complete( $order_id ){
 
                 if($tokens){
                     foreach($tokens as $token){
-                        sendNotification($order_id, $office->name, $token);
+                        sendNotification($order_id, $officeName, $token->meta_value);
                     }
                 }
             }
@@ -74,24 +80,21 @@ function sendNotification($order_id, $officeName, $tokenDestination){
         'Content-type: application/json',
         'Authorization: key=' . get_option("woo_del_lat_fcmServerKey"),
     );
-    # Create a connection
+    // FCM legacy HTTP API (shut down by Google in 2024; see README).
     $url = 'https://fcm.googleapis.com/fcm/send';
-    $ch = curl_init($url);
-    # Form data string
-    $postString = http_build_query($data, '', '&');
-    # Setting our options
+    $ch = curl_init($url);
+    $postString = http_build_query($data, '', '&');
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $postString);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    # Get the response
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $response = curl_exec($ch);
     curl_close($ch);
 }
 
 function register_token_user(){
     ?>
-    <script type="text/javascript" src="/wp-content/plugins/woo-delivery-lat/public/js/woo-delivery-geolocation.js"></script>
+    <script type="text/javascript" src="<?php echo esc_url(WOO_DEL_LAT_URL . "public/js/woo-delivery-geolocation.js"); ?>"></script>
 
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-messaging.js"></script>
@@ -119,28 +122,24 @@ function register_token_user(){
         initializePushNotifications().then(function (consent) {
             if (consent === 'granted') {
                 if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('/wp-content/plugins/woo-delivery-lat/public/js/sw.js').then(function (registration) {
+                    navigator.serviceWorker.register('<?php echo esc_js(WOO_DEL_LAT_URL . "public/js/sw.js"); ?>').then(function (registration) {
                         console.log('Service worker registration succeeded:', registration);
                         messaging.getToken({
                             serviceWorkerRegistration: registration,
                             vapidKey:
                                 '<?php echo esc_js(get_option("woo_del_lat_firebaseVapidKey")); ?>'
                         }).then((currentToken) => {
-                            console.log("hdsudu");
-                            console.log(currentToken);
                             if (currentToken) {
                                 var form_data = new FormData();
                                 form_data.append('token', currentToken);
                                 form_data.append('action', 'woo_delivery_lat_add_token');
                                     jQuery.ajax({
-                                        url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                                        url: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
                                         type: 'post',
                                         contentType: false,
                                         processData: false,
                                         data: form_data,
-                                        success: function (response) {
-                                            console.log("element resposne");
-                                        },
+                                        success: function (response) {},
                                         error: function (response) {
                                             console.log("error:");
                                             console.log(response);
@@ -170,7 +169,6 @@ function register_token_user(){
      * asks user consent to receive push notifications and returns the response of the user, one of granted, default, denied
      */
     function initializePushNotifications() {
-        console.log("inicializaod");
         // request user grant to show notification
         return Notification.requestPermission(function(result) {
             return result;

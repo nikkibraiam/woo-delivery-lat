@@ -50,13 +50,13 @@ function woo_delivery_lat_store_list_func($atts) {
             form_data.append("action", "woo_delivery_lat_load_cookie");
 
             jQuery.ajax({
-                url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                url: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
                 type: 'post',
                 contentType: false,
                 processData: false,
                 data: form_data,
                 success: function (response) {
-                    window.location.href = "<?php echo $atts["page"]; ?>?office=" + officeId;
+                    window.location.href = "<?php echo esc_js(esc_url($atts["page"] ?? "")); ?>?office=" + officeId;
                 },
                 error: function (response) {
                     console.log("error:");
@@ -78,10 +78,10 @@ function woo_delivery_lat_store_list_func($atts) {
         <?php foreach($offices as $office) { ?>
         <div class="col-md-6 bg-white p-4 text-center">
             <?php do_action( 'woo_del_lat_header_store_detail'); ?>
-            <h4><?php echo $office->name; ?></h4>
-            <div><?php echo $office->address; ?></div>
-            <div><?php echo $office->phone; ?></div>
-            <a class="wp-block-button__link" href="javascript:void(0)" onclick="gotoPage(<?php echo $office->id; ?>)">Ingresar</a>
+            <h4><?php echo esc_html($office->name); ?></h4>
+            <div><?php echo esc_html($office->address); ?></div>
+            <div><?php echo esc_html($office->phone); ?></div>
+            <a class="wp-block-button__link" href="javascript:void(0)" onclick="gotoPage(<?php echo absint($office->id); ?>)">Ingresar</a>
             <?php do_action( 'woo_del_lat_footer_store_detail'); ?>
         </div>
         <?php } ?>
@@ -93,13 +93,13 @@ function woo_delivery_lat_store_list_func($atts) {
                 <p><b>Nuestras sedes</b></p>
                 <?php foreach($officesFull as $office){ ?>
                     <div>
-                        <div><b><?php echo $office->name; ?></b></div>
-                        <div><?php echo $office->address; ?></div>
+                        <div><b><?php echo esc_html($office->name); ?></b></div>
+                        <div><?php echo esc_html($office->address); ?></div>
                         <?php if($office->schedules){ ?>
                             <div>Horario</div>
                             <?php foreach($office->schedules as $schedule){
                                 foreach($schedule->details as $detail) ?>
-                                <div><?php echo "Día $detail->week_day desde las $detail->start_hour hasta las $detail->end_hour" ?></div>
+                                <div><?php echo esc_html("Día $detail->week_day desde las $detail->start_hour hasta las $detail->end_hour") ?></div>
                         <?php }
                         } ?>
                     </div>

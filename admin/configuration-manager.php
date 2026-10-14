@@ -5,6 +5,12 @@ if(isset($_POST["googleKey"]) && current_user_can("manage_options") && check_adm
     update_option("woo_del_lat_googleKey", sanitize_text_field($_POST["googleKey"]));
     update_option("woo_del_lat_firebaseApiKey", sanitize_text_field($_POST["firebaseApiKey"]));
     update_option("woo_del_lat_fcmServerKey", sanitize_text_field($_POST["fcmServerKey"]));
+    update_option("woo_del_lat_firebaseAuthDomain", sanitize_text_field($_POST["firebaseAuthDomain"] ?? ""));
+    update_option("woo_del_lat_firebaseProjectId", sanitize_text_field($_POST["firebaseProjectId"] ?? ""));
+    update_option("woo_del_lat_firebaseStorageBucket", sanitize_text_field($_POST["firebaseStorageBucket"] ?? ""));
+    update_option("woo_del_lat_firebaseSenderId", sanitize_text_field($_POST["firebaseSenderId"] ?? ""));
+    update_option("woo_del_lat_firebaseAppId", sanitize_text_field($_POST["firebaseAppId"] ?? ""));
+    update_option("woo_del_lat_firebaseVapidKey", sanitize_text_field($_POST["firebaseVapidKey"] ?? ""));
     update_option("woo_del_lat_notificationEmails", sanitize_text_field($_POST["notificationEmails"]));
     update_option("woo_del_lat_activeNotification", isset($_POST["activeNotification"]) ? "on" : "");
     update_option("woo_del_lat_templateEmail", absint($_POST["templateEmail"]));
@@ -13,11 +19,17 @@ if(isset($_POST["googleKey"]) && current_user_can("manage_options") && check_adm
 $googleKey = get_option("woo_del_lat_googleKey");
 $firebaseApiKey = get_option("woo_del_lat_firebaseApiKey");
 $fcmServerKey = get_option("woo_del_lat_fcmServerKey");
+$firebaseAuthDomain = get_option("woo_del_lat_firebaseAuthDomain");
+$firebaseProjectId = get_option("woo_del_lat_firebaseProjectId");
+$firebaseStorageBucket = get_option("woo_del_lat_firebaseStorageBucket");
+$firebaseSenderId = get_option("woo_del_lat_firebaseSenderId");
+$firebaseAppId = get_option("woo_del_lat_firebaseAppId");
+$firebaseVapidKey = get_option("woo_del_lat_firebaseVapidKey");
 $notificationEmails = get_option("woo_del_lat_notificationEmails");
 $activeNotification = get_option("woo_del_lat_activeNotification");
 $templateEmail = get_option("woo_del_lat_templateEmail");
 
-//Carga un listado de post para la plantilla.
+// Posts that can be used as the notification email template.
 $args = array(
     'post_type'=> 'post',
     'orderby'    => 'post_title',
@@ -56,6 +68,54 @@ $templateList = new WP_Query( $args );
         </tr>
         <tr>
           <th>
+            <label for="firebaseAuthDomain">Firebase authDomain</label>
+          </th>
+          <td>
+            <input type="text" name="firebaseAuthDomain" id="firebaseAuthDomain" value="<?php echo esc_attr($firebaseAuthDomain)?>" class="regular-text">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <label for="firebaseProjectId">Firebase projectId</label>
+          </th>
+          <td>
+            <input type="text" name="firebaseProjectId" id="firebaseProjectId" value="<?php echo esc_attr($firebaseProjectId)?>" class="regular-text">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <label for="firebaseStorageBucket">Firebase storageBucket</label>
+          </th>
+          <td>
+            <input type="text" name="firebaseStorageBucket" id="firebaseStorageBucket" value="<?php echo esc_attr($firebaseStorageBucket)?>" class="regular-text">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <label for="firebaseSenderId">Firebase messagingSenderId</label>
+          </th>
+          <td>
+            <input type="text" name="firebaseSenderId" id="firebaseSenderId" value="<?php echo esc_attr($firebaseSenderId)?>" class="regular-text">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <label for="firebaseAppId">Firebase appId</label>
+          </th>
+          <td>
+            <input type="text" name="firebaseAppId" id="firebaseAppId" value="<?php echo esc_attr($firebaseAppId)?>" class="regular-text">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <label for="firebaseVapidKey">Llave VAPID pública (Web Push)</label>
+          </th>
+          <td>
+            <input type="text" name="firebaseVapidKey" id="firebaseVapidKey" value="<?php echo esc_attr($firebaseVapidKey)?>" class="regular-text">
+          </td>
+        </tr>
+        <tr>
+          <th>
             <label for="fcmServerKey">Llave de servidor de FCM</label><br>
             <small>Necesaria para enviar la notificación push a la sede cuando llega una orden.</small>
           </th>
@@ -70,7 +130,7 @@ $templateList = new WP_Query( $args );
             destinatario cada vez que llega una nueva orden.</small>
           </th>
           <td>
-            <input type="text" name="notificationEmails" id="notificationEmails" value="<?php echo $notificationEmails?>" class="regular-text" required>
+            <input type="text" name="notificationEmails" id="notificationEmails" value="<?php echo esc_attr($notificationEmails)?>" class="regular-text" required>
           </td>
         </tr>
         <tr>
@@ -87,7 +147,7 @@ $templateList = new WP_Query( $args );
             <select name="templateEmail" id="templateEmail" value="<?php echo $templateEmail; ?>">
         <?php if($templateList->have_posts()){ 
                 while ( $templateList->have_posts() ) { $templateList->the_post(); ?>
-                <option value="<?php echo get_the_ID(); ?>" <?php echo $templateEmail && $templateEmail == get_the_ID()? "selected":"";?>><?php echo the_title(); ?></option>
+                <option value="<?php echo get_the_ID(); ?>" <?php echo $templateEmail && $templateEmail == get_the_ID()? "selected":"";?>><?php echo esc_html(get_the_title()); ?></option>
            <?php } } else{ ?>
                 <option value="">No disponible</option>
         <?php } ?>

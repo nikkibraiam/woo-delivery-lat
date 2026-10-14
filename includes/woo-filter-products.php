@@ -4,7 +4,7 @@ defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 function woolat_product_is_visible($visible, $product_id){
     if(isset($_GET["office"]) || isset($_COOKIE["woo_del_lat_office"])){
-        $officeId = $_COOKIE["woo_del_lat_office"]??$_GET["office"];
+        $officeId = absint($_COOKIE["woo_del_lat_office"] ?? $_GET["office"]);
         if($visible){
             $visible = false;
             $meta = get_post_meta($product_id, "offices");
@@ -48,8 +48,7 @@ function woocommerce_registe_post($array){
 add_filter('woocommerce_register_post_type_product', 'woocommerce_registe_post', 10, 1);
 
 
-## The following goes inside the constructor ##
-
+// Per-branch price override.
 // Simple, grouped and external products
 // add_filter('woocommerce_product_get_price', 'custom_price', 99, 2 );
 // add_filter('woocommerce_product_get_regular_price', 'custom_price', 99, 2 );
@@ -60,8 +59,6 @@ add_filter('woocommerce_product_variation_get_price', 'custom_price', 99, 2 );
 // Variable (price range)
 add_filter('woocommerce_variation_prices_price', 'custom_variable_price', 99, 3 );
 add_filter('woocommerce_variation_prices_regular_price', 'custom_variable_price', 99, 3 );
-
-## This goes outside the constructor ##
 
 function custom_price( $price, $product ) {
     if(isset($_GET["office"]) || isset($_COOKIE["woo_del_lat_office"])){
@@ -111,7 +108,7 @@ function cw_change_product_html( $price_html, $product ) {
 
   function woolat_change_price($price, $product){
     global $metaPos, $posid;
-    $officeId = $_COOKIE["woo_del_lat_office"] ?? $_GET["office"];
+    $officeId = absint($_COOKIE["woo_del_lat_office"] ?? $_GET["office"]);
     if($metaPos == null || $posid != $product->id){
         $posid = $product->id;
         $metaPos = get_post_meta($product->id, "offices");
@@ -130,24 +127,24 @@ function cw_change_product_html( $price_html, $product ) {
 
 function del_lat_woocommerce_before_shop_loop(){
     if(isset($_COOKIE["woo_del_lat_office"])){
-        $officeId = $_COOKIE["woo_del_lat_office"]; 
-        if($officeId != null){
-            $officeService = new BranchOfficeService();
-            $office = $officeService->get($officeId); ?>
+        $officeId = absint($_COOKIE["woo_del_lat_office"]);
+        $officeService = new BranchOfficeService();
+        $office = $officeId ? $officeService->get($officeId) : null;
+        if($office != null){ ?>
         <div class="float-office">
             <div class="close-btn" onclick="closeOffice()">
             <span class="dashicons dashicons-no"></span>
             </div>
                 <div>
                     <div>
-                        <b><?php echo $office->name; ?></b>
+                        <b><?php echo esc_html($office->name); ?></b>
                     </div>
                 </div>
                 <?php 
             if(isset($_COOKIE['woo_del_lat_address'])){
-            $address = str_replace("+", " ", $_COOKIE['woo_del_lat_address']);
+            $address = sanitize_text_field(wp_unslash(str_replace("+", " ", $_COOKIE['woo_del_lat_address'])));
             if($address){ ?>
-                <div>Su dirección es <?php echo html_entity_decode($address); ?></div>
+                <div>Su dirección es <?php echo esc_html($address); ?></div>
                 <?php } } ?>
         </div>
         <?php
@@ -161,7 +158,7 @@ function del_lat_woocommerce_before_shop_loop(){
             form_data.append("action", "woo_delivery_lat_clear_cookie");
 
             jQuery.ajax({
-                url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                url: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
                 type: 'post',
                 contentType: false,
                 processData: false,
@@ -177,7 +174,7 @@ function del_lat_woocommerce_before_shop_loop(){
             });
         }
     </script> 
-    <link type="text/css" rel="stylesheet" href="/wp-content/plugins/woo-delivery-lat/public/css/del-lat-styles.css">
+    <link type="text/css" rel="stylesheet" href="<?php echo esc_url(WOO_DEL_LAT_URL . "public/css/del-lat-styles.css"); ?>">
     <?php
 }
 

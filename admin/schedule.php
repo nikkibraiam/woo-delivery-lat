@@ -4,14 +4,19 @@
     require_once 'services/schedule-service.php';
 
     $service = new ScheduleService();
-    if(isset($_GET["delete"])){
+    if(!current_user_can("manage_options")){
+  wp_die("forbidden");
+}
+if(isset($_GET["delete"])){
       if($_GET["delete"] == true){
-        $res = $service->delete($_GET["id-object"]);
+        check_admin_referer("woo_del_lat_delete_schedule");
+    $res = $service->delete(absint($_GET["id-object"]));
       }
     }
     
     if(isset($_POST) && count($_POST) > 0){
-      $res = $service->save($_POST);
+  check_admin_referer("woo_del_lat_save_schedule");
+      $res = $service->save(wp_unslash($_POST));
     }
     $result = $service->getList();
     
@@ -37,14 +42,14 @@
             if($result != null && sizeof($result) > 0){
               foreach ($result as $print) { ?>
                   <tr>
-                    <td width='20%'><?php echo $print->id?></td>
-                    <td width='20%'><?php echo $print->name?></td>
-                    <td width='20%'><?php echo $print->description?></td>
-                    <td width='20%'><?php echo $print->state?></td>
+                    <td width='20%'><?php echo esc_html($print->id)?></td>
+                    <td width='20%'><?php echo esc_html($print->name)?></td>
+                    <td width='20%'><?php echo esc_html($print->description)?></td>
+                    <td width='20%'><?php echo esc_html($print->state)?></td>
                     <td width='20%'>
-                      <a href="admin.php?page=woo-delivery-lat/admin/schedule.php&edit=true&id-object=<?php echo $print->id?>">
+                      <a href="admin.php?page=woo-delivery-lat/admin/schedule.php&edit=true&id-object=<?php echo absint($print->id)?>">
                       <button type='button'>Actualizar</button></a> 
-                      <a href="admin.php?page=woo-delivery-lat/admin/schedule.php&id-object=<?php echo $print->id?>&delete=true">
+                      <a href="admin.php?page=woo-delivery-lat/admin/schedule.php&id-object=<?php echo absint($print->id)?>&delete=true&_wpnonce=<?php echo wp_create_nonce("woo_del_lat_delete_schedule")?>">
                       <button type='button'>Eliminar</button></a>
                     </td>
                   </tr>

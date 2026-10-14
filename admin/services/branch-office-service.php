@@ -1,5 +1,11 @@
-<?php 
+<?php
 
+defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
+
+/**
+ * Data access for branch offices and their schedule assignments.
+ * All queries go through $wpdb->prepare / insert / update / delete.
+ */
 class BranchOfficeService{
 
     private $tableName = "";
@@ -15,13 +21,12 @@ class BranchOfficeService{
 
     function getList(){
         $tableName = $this->tableName;
-        $res = $this->wpdb->get_results("SELECT * FROM $tableName");
-        return $res;
+        return $this->wpdb->get_results("SELECT * FROM $tableName");
     }
 
     function get($id, $includeSchedule = false){
         $tableName = $this->tableName;
-        $res = $this->wpdb->get_results("SELECT * FROM $tableName WHERE id = $id");
+        $res = $this->wpdb->get_results($this->wpdb->prepare("SELECT * FROM $tableName WHERE id = %d", absint($id)));
         if(sizeof($res) > 0){
             if($includeSchedule){
                 $res[0]->schedules = $this->getSchedule($res[0]->id);
@@ -34,72 +39,79 @@ class BranchOfficeService{
     function getSchedule($office_id){
         $tableNameChild = $this->tableNameChild;
         $tableSchedule = $this->wpdb->prefix . "wdlat_schedules";
-        $res = $this->wpdb->get_results("SELECT os.id as idmain, sch.* FROM $tableNameChild as os 
-                INNER JOIN $tableSchedule as sch  ON os.schedule_id = sch.id  
-                WHERE os.office_id = $office_id");
-        return $res;
+        return $this->wpdb->get_results($this->wpdb->prepare("SELECT os.id as idmain, sch.* FROM $tableNameChild as os
+                INNER JOIN $tableSchedule as sch  ON os.schedule_id = sch.id
+                WHERE os.office_id = %d", absint($office_id)));
     }
-    
+
     function save($branchOffice){
-        $tableName = $this->tableName;
-        if($branchOffice["id"] != null && $branchOffice["id"] > 0){
-            $this->wpdb->query("UPDATE $tableName SET name='".$branchOffice["name"]."', description='".$branchOffice["description"]."', phone='".$branchOffice["phone"]."', address='".$branchOffice["address"]."', latitude='".$branchOffice["latitude"]."', longitude='".$branchOffice["longitude"]."', kmlfile='".$branchOffice["kmlfile"]."', state='".$branchOffice["state"]."' WHERE id=".$branchOffice["id"]);
+        $data = array(
+            "name"        => sanitize_text_field($branchOffice["name"] ?? ""),
+            "description" => sanitize_text_field($branchOffice["description"] ?? ""),
+            "phone"       => sanitize_text_field($branchOffice["phone"] ?? ""),
+            "address"     => sanitize_text_field($branchOffice["address"] ?? ""),
+            "latitude"    => (float)($branchOffice["latitude"] ?? 0),
+            "longitude"   => (float)($branchOffice["longitude"] ?? 0),
+            "kmlfile"     => sanitize_text_field($branchOffice["kmlfile"] ?? ""),
+        );
+        $id = absint($branchOffice["id"] ?? 0);
+        if($id > 0){
+            $data["state"] = isset($branchOffice["state"]) ? 1 : 0;
+            $this->wpdb->update($this->tableName, $data, array("id" => $id));
         }else{
-            $res = $this->wpdb->query("INSERT INTO $tableName (name, description, phone, address, latitude, longitude, kmlfile) VALUES('".$branchOffice["name"]."', '".$branchOffice["description"]."', '".$branchOffice["phone"]."', '".$branchOffice["address"]."', '".$branchOffice["latitude"]."', '".$branchOffice["longitude"]."', '".$branchOffice["kmlfile"]."')");
-            $branchOffice["id"] = $this->wpdb->insert_id;
+            $this->wpdb->insert($this->tableName, $data);
+            $id = $this->wpdb->insert_id;
         }
 
         if(isset($branchOffice["schedules"])){
-            $oldSchedules = $this->getSchedule($branchOffice["id"]);
-            $ids = array_map(function($schedule){return $schedule["id"];}, $branchOffice["schedules"]);
+            $oldSchedules = $this->getSchedule($id);
+            $ids = array_map(function($schedule){return absint($schedule["id"] ?? 0);}, $branchOffice["schedules"]);
             if(isset($oldSchedules)){
                 foreach($oldSchedules as $oldSchedule){
-                    if(!in_array($oldSchedule->idmain, $ids)){
+                    if(!in_array((int)$oldSchedule->idmain, $ids)){
                         $this->deleteSchedule($oldSchedule->idmain);
                     }
                 }
             }
 
-            if(isset($branchOffice["schedules"])){
-                foreach($branchOffice["schedules"] as $schedule){
-                    $schedule["office_id"] = $branchOffice["id"];
-                    $this->saveSchedule($schedule);
-                }
+            foreach($branchOffice["schedules"] as $schedule){
+                $schedule["office_id"] = $id;
+                $this->saveSchedule($schedule);
             }
         }
-        if(isset($this->wpdb)){
-            print_r($this->wpdb->last_error);
+        if($this->wpdb->last_error){
+            error_log("woo-delivery-lat: " . $this->wpdb->last_error);
         }
         return true;
     }
 
     function deleteSchedule($schedule_office_id){
-        $tableName = $this->tableNameChild;
-        $this->wpdb->query("DELETE FROM $tableName WHERE id = $schedule_office_id");
+        $this->wpdb->delete($this->tableNameChild, array("id" => absint($schedule_office_id)));
         return true;
     }
 
     function saveSchedule($office_schedule){
-        $tableName = $this->tableNameChild;
-        if($office_schedule["id"] != null && $office_schedule["id"] > 0){
-            $this->wpdb->query("UPDATE $tableName SET schedule_id='".$office_schedule["schedule_id"]."', office_id='".$office_schedule["office_id"]."' WHERE id=".$office_schedule["id"]);
+        $data = array(
+            "schedule_id" => absint($office_schedule["schedule_id"] ?? 0),
+            "office_id"   => absint($office_schedule["office_id"] ?? 0),
+        );
+        $id = absint($office_schedule["id"] ?? 0);
+        if($id > 0){
+            $this->wpdb->update($this->tableNameChild, $data, array("id" => $id));
         }else{
-            $res = $this->wpdb->query("INSERT INTO $tableName (schedule_id, office_id) VALUES ('".$office_schedule["schedule_id"]."', '".$office_schedule["office_id"]."')");
+            $this->wpdb->insert($this->tableNameChild, $data);
         }
-        if(isset($this->wpdb)){
-            print_r($this->wpdb->last_error);
+        if($this->wpdb->last_error){
+            error_log("woo-delivery-lat: " . $this->wpdb->last_error);
         }
         return true;
     }
 
     function delete($id){
-        $tableName = $this->tableName;
-        $tableNameChild = $this->tableNameChild;
-        $this->wpdb->query("DELETE FROM $tableNameChild where office_id = $id");
-        $this->wpdb->query("DELETE FROM $tableName WHERE id = $id");
+        $id = absint($id);
+        $this->wpdb->delete($this->tableNameChild, array("office_id" => $id));
+        $this->wpdb->delete($this->tableName, array("id" => $id));
         return true;
     }
 
 }
-
-?>

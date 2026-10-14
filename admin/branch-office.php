@@ -4,14 +4,19 @@ defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 require_once 'services/branch-office-service.php';
 
 $service = new BranchOfficeService();
+if(!current_user_can("manage_options")){
+  wp_die("forbidden");
+}
 if(isset($_GET["delete"])){
   if($_GET["delete"] == true){
-    $res = $service->delete($_GET["id-object"]);
+    check_admin_referer("woo_del_lat_delete_branch_office");
+    $res = $service->delete(absint($_GET["id-object"]));
   }
 }
 
 if(isset($_POST) && count($_POST) > 0){
-  $res = $service->save($_POST);
+  check_admin_referer("woo_del_lat_save_branch_office");
+  $res = $service->save(wp_unslash($_POST));
 }
 $result = $service->getList();
 ?>
@@ -49,14 +54,14 @@ $result = $service->getList();
         if($result != null && sizeof($result) > 0){
           foreach ($result as $print) { ?>
               <tr>
-                <td width='20%'><?php echo $print->id?></td>
-                <td width='20%'><?php echo $print->name?></td>
-                <td width='20%'><?php echo $print->phone?></td>
-                <td width='20%'><?php echo $print->address?></td>
+                <td width='20%'><?php echo esc_html($print->id)?></td>
+                <td width='20%'><?php echo esc_html($print->name)?></td>
+                <td width='20%'><?php echo esc_html($print->phone)?></td>
+                <td width='20%'><?php echo esc_html($print->address)?></td>
                 <td width='20%'>
-                  <a href="admin.php?page=woo-delivery-lat/admin/branch-office.php&edit=true&id-object=<?php echo $print->id?>">
+                  <a href="admin.php?page=woo-delivery-lat/admin/branch-office.php&edit=true&id-object=<?php echo absint($print->id)?>">
                   <button type='button'>Actualizar</button></a> 
-                  <a href="admin.php?page=woo-delivery-lat/admin/branch-office.php&id-object=<?php echo $print->id?>&delete=true">
+                  <a href="admin.php?page=woo-delivery-lat/admin/branch-office.php&id-object=<?php echo absint($print->id)?>&delete=true&_wpnonce=<?php echo wp_create_nonce("woo_del_lat_delete_branch_office")?>">
                   <button type='button'>Eliminar</button></a>
                 </td>
               </tr>

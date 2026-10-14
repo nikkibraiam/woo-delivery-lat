@@ -5,8 +5,20 @@ defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 add_action('save_post_product', 'product_published', 10, 3);
 
 function product_published($post_id, $post, $update){
-    if(isset($_POST['offices'])){
-        update_post_meta($post_id, 'offices', $_POST['offices']);
+    if(isset($_POST['offices']) && is_array($_POST['offices']) && current_user_can('edit_post', $post_id)){
+        $offices = array();
+        foreach(wp_unslash($_POST['offices']) as $index => $office){
+            $clean = array(
+                'office_id' => absint($office['office_id'] ?? 0),
+                'price'     => wc_format_decimal($office['price'] ?? ''),
+                'amount'    => wc_format_decimal($office['amount'] ?? ''),
+            );
+            if(isset($office['schedule']) && is_array($office['schedule'])){
+                $clean['schedule'] = array_map('absint', $office['schedule']);
+            }
+            $offices[$index] = $clean;
+        }
+        update_post_meta($post_id, 'offices', $offices);
     }
 }
 
@@ -56,8 +68,8 @@ function wooDelivery_product_panels(){
 	) );
 
     $update = [];
-    if($_GET["post"]){
-        $update = get_post_meta($_GET["post"], "offices");
+    if(isset($_GET["post"])){
+        $update = get_post_meta(absint($_GET["post"]), "offices");
     }
     foreach($update as $child){
         foreach($child as $index => $office){

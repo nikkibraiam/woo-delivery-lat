@@ -1,5 +1,11 @@
-<?php 
+<?php
 
+defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
+
+/**
+ * Data access for schedules (opening hours) and their per-weekday details.
+ * All queries go through $wpdb->prepare / insert / update / delete.
+ */
 class ScheduleService{
 
     private $tableName = "";
@@ -19,13 +25,12 @@ class ScheduleService{
         if($active){
             $sql = $sql . " WHERE state = 1";
         }
-        $res = $this->wpdb->get_results($sql);
-        return $res;
+        return $this->wpdb->get_results($sql);
     }
 
     function get($id, $include_det = false){
         $tableName = $this->tableName;
-        $res = $this->wpdb->get_results("SELECT * FROM $tableName WHERE id = $id");
+        $res = $this->wpdb->get_results($this->wpdb->prepare("SELECT * FROM $tableName WHERE id = %d", absint($id)));
         if(sizeof($res) > 0){
             if($include_det){
                 $res[0]->details = $this->getDetails($res[0]->id);
@@ -37,71 +42,79 @@ class ScheduleService{
 
     function getDetails($shedule_id){
         $tableName = $this->tableNameDet;
-        $res = $this->wpdb->get_results("SELECT * FROM $tableName WHERE schedule_id = $shedule_id");
-        return $res;
+        return $this->wpdb->get_results($this->wpdb->prepare("SELECT * FROM $tableName WHERE schedule_id = %d", absint($shedule_id)));
     }
 
-    
+
     function save($schedule){
-        $tableName = $this->tableName;
-        if($schedule["id"] != null && $schedule["id"] > 0){
-            $this->wpdb->query("UPDATE $tableName SET name='".$schedule["name"]."', description='".$schedule["description"]."', state='".$schedule["state"]."' WHERE id=".$schedule["id"]);
+        $data = array(
+            "name"        => sanitize_text_field($schedule["name"] ?? ""),
+            "description" => sanitize_text_field($schedule["description"] ?? ""),
+        );
+        $id = absint($schedule["id"] ?? 0);
+        if($id > 0){
+            $data["state"] = isset($schedule["state"]) ? 1 : 0;
+            $this->wpdb->update($this->tableName, $data, array("id" => $id));
         }else{
-            $res = $this->wpdb->query("INSERT INTO $tableName (name, description) VALUES('".$schedule["name"]."', '".$schedule["description"]."')");
-            $schedule["id"] = $this->wpdb->insert_id;
+            $this->wpdb->insert($this->tableName, $data);
+            $id = $this->wpdb->insert_id;
         }
 
-        $oldDetails = $this->getDetails($schedule["id"]);
-        $ids = array_map(function($detail){return $detail["id"];}, $schedule["details"]);
+        $details = $schedule["details"] ?? array();
+        $oldDetails = $this->getDetails($id);
+        $ids = array_map(function($detail){return absint($detail["id"] ?? 0);}, $details);
         if(isset($oldDetails)){
             foreach($oldDetails as $oldDetail){
-                if(!in_array($oldDetail->id, $ids)){
+                if(!in_array((int)$oldDetail->id, $ids)){
                     $this->deleteDetail($oldDetail->id);
-                }        
+                }
             }
         }
-        
-        if(isset($schedule["details"])){
-            foreach($schedule["details"] as $detail){
-                $detail["schedule_id"] = $schedule["id"];
-                $this->saveDetail($detail);
-            }
+
+        foreach($details as $detail){
+            $detail["schedule_id"] = $id;
+            $this->saveDetail($detail);
         }
-        if(isset($this->wpdb)){
-            print_r($this->wpdb->last_error);
+        if($this->wpdb->last_error){
+            error_log("woo-delivery-lat: " . $this->wpdb->last_error);
         }
         return true;
     }
 
     function saveDetail($detail){
-        $tableName = $this->tableNameDet;
-        if($detail["id"] != null && $detail["id"] > 0){
-            $this->wpdb->query("UPDATE $tableName SET schedule_id='".$detail["schedule_id"]."', week_day='".$detail["week_day"]."', start_hour='".$detail["start_hour"]."', end_hour='".$detail["end_hour"]."', state='".$detail["state"]."' WHERE id=".$detail["id"]);
+        $data = array(
+            "schedule_id" => absint($detail["schedule_id"] ?? 0),
+            "week_day"    => absint($detail["week_day"] ?? 0),
+            "start_hour"  => $this->sanitizeTime($detail["start_hour"] ?? ""),
+            "end_hour"    => $this->sanitizeTime($detail["end_hour"] ?? ""),
+        );
+        $id = absint($detail["id"] ?? 0);
+        if($id > 0){
+            $data["state"] = isset($detail["state"]) ? 1 : 0;
+            $this->wpdb->update($this->tableNameDet, $data, array("id" => $id));
         }else{
-            $res = $this->wpdb->query("INSERT INTO $tableName (schedule_id, week_day, start_hour, end_hour) VALUES('".$detail["schedule_id"]."', '".$detail["week_day"]."', '".$detail["start_hour"]."', '".$detail["end_hour"]."')");
+            $this->wpdb->insert($this->tableNameDet, $data);
         }
-        if(isset($this->wpdb)){
-            print_r($this->wpdb->last_error);
+        if($this->wpdb->last_error){
+            error_log("woo-delivery-lat: " . $this->wpdb->last_error);
         }
         return true;
     }
 
-    
+    private function sanitizeTime($value){
+        return preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $value) ? $value : "00:00:00";
+    }
 
     function deleteDetail($id){
-        $tableName = $this->tableNameDet;
-        $this->wpdb->query("DELETE FROM $tableName WHERE id = $id");
+        $this->wpdb->delete($this->tableNameDet, array("id" => absint($id)));
         return true;
     }
 
     function delete($id){
-        $tableName = $this->tableName;
-        $tableNameChild = $this->wpdb->prefix . "wdlat_branch_schedule";
-        $this->wpdb->query("DELETE FROM $tableNameChild WHERE schedule_id = $id");
-        $this->wpdb->query("DELETE FROM $tableName WHERE id = $id");
+        $id = absint($id);
+        $this->wpdb->delete($this->wpdb->prefix . "wdlat_branch_schedule", array("schedule_id" => $id));
+        $this->wpdb->delete($this->tableName, array("id" => $id));
         return true;
     }
 
 }
-
-?>

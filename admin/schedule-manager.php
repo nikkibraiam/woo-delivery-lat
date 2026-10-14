@@ -9,7 +9,7 @@ $service = new ScheduleService();
 
 $unique = (object)['id' => null, 'name' => null, 'description' => null, 'state' => null, 'details' => null];
 if(isset($_GET["id-object"])){
-    $unique = $service->get($_GET["id-object"], true);
+    $unique = $service->get(absint($_GET["id-object"]), true);
 }
 
 ?>
@@ -17,7 +17,8 @@ if(isset($_GET["id-object"])){
 <div class="wrap">
   <h1 class="wp-heading-inline">Gestion del horario</h1>
   <form action="admin.php?page=woo-delivery-lat/admin/schedule.php" method="post">
-    <input type="hidden" id="id" name="id" value="<?php echo $unique->id?>">
+    <?php wp_nonce_field("woo_del_lat_save_schedule"); ?>
+    <input type="hidden" id="id" name="id" value="<?php echo esc_attr($unique->id)?>">
     <table class="form-table" role="presentation">
       <tbody>
         <tr class="name-branch-office">
@@ -25,7 +26,7 @@ if(isset($_GET["id-object"])){
             <label for="name">Nombre</label>
           </th>
           <td>
-            <input type="text" name="name" id="name" value="<?php echo $unique->name?>" class="regular-text" required>
+            <input type="text" name="name" id="name" value="<?php echo esc_attr($unique->name)?>" class="regular-text" required>
           </td>
         </tr>
         <tr class="description-branch-office">
@@ -33,14 +34,14 @@ if(isset($_GET["id-object"])){
             <label for="name">Descripción</label>
           </th>
           <td>
-            <input type="text" name="description" id="description" value="<?php echo $unique->description?>" class="regular-text" >
+            <input type="text" name="description" id="description" value="<?php echo esc_attr($unique->description)?>" class="regular-text" >
           </td>
         </tr>
         <tr class="show-admin-bar state-front-wrap">
           <th scope="row">Estado</th>
           <td>
             <label for="state">
-              <input name="state" type="checkbox" id="state" value="<?php echo $unique->state?>" checked='checked' />
+              <input name="state" type="checkbox" id="state" value="<?php echo esc_attr($unique->state)?>" checked='checked' />
               Activo?</label>
               <br />
           </td>
@@ -65,7 +66,7 @@ if(isset($_GET["id-object"])){
           foreach($unique->details as $detail){ ?>
             <tr>
               <td>
-                <input type='hidden' value="<?php echo $detail->id; ?>" class='det-id' id='details[<?php echo $index; ?>][id]' name='details[<?php echo $index; ?>][id]'/>
+                <input type='hidden' value="<?php echo absint($detail->id); ?>" class='det-id' id='details[<?php echo $index; ?>][id]' name='details[<?php echo $index; ?>][id]'/>
                 <select id="details[<?php echo $index ?>][week_day]" name="details[<?php echo $index ?>][week_day]" class="det-week_day">
                   <option value="">--Seleccione--</option>
                   <?php foreach(week_days as $item) { ?>

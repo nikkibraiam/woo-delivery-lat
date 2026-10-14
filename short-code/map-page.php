@@ -40,22 +40,22 @@ function woo_delivery_lat_map_func($atts) {
     }
     ob_start(); 
     ?>
-    <link type="text/css" rel="stylesheet" href="/wp-content/plugins/woo-delivery-lat/public/css/modal.css">
+    <link type="text/css" rel="stylesheet" href="<?php echo esc_url(WOO_DEL_LAT_URL . "public/css/modal.css"); ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
-    <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=<?php echo get_option("woo_del_lat_googleKey"); ?>"></script>
+    <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=<?php echo esc_attr(get_option("woo_del_lat_googleKey")); ?>"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/geocodezip/geoxml3/polys/geoxml3.js"></script>
-    <script type="text/javascript" src="/wp-content/plugins/woo-delivery-lat/public/js/woo-delivery-geolocation.js"></script>
-    <script type="text/javascript" src="/wp-content/plugins/woo-delivery-lat/public/js/modal.js"></script>
+    <script type="text/javascript" src="<?php echo esc_url(WOO_DEL_LAT_URL . "public/js/woo-delivery-geolocation.js"); ?>"></script>
+    <script type="text/javascript" src="<?php echo esc_url(WOO_DEL_LAT_URL . "public/js/modal.js"); ?>"></script>
     <script type="text/javascript">
         var offices = [];
         var locationdev = {
             latitude: 0,
             longitude: 0
         }
-        var url = "<?php echo get_site_url(); ?>";
+        var url = "<?php echo esc_js(get_site_url()); ?>";
         jQuery(document).ready(function(){
             open_map(false);
             jQuery("#search").click(function(){
@@ -77,7 +77,7 @@ function woo_delivery_lat_map_func($atts) {
                         form_data.append("action", "woo_delivery_lat_load_cookie");
 
                         jQuery.ajax({
-                            url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                            url: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
                             type: 'post',
                             contentType: false,
                             processData: false,
@@ -113,10 +113,10 @@ function woo_delivery_lat_map_func($atts) {
                 <?php if(isset($offices)) {
                     foreach($offices as $office) {
                         if(isset($office->kmlfile)){ ?>
-                            initialize_GeoCoverage(map, url + "/<?php echo $office->kmlfile?>", reload, false);
+                            initialize_GeoCoverage(map, url + "/<?php echo esc_js($office->kmlfile)?>", reload, false);
                             offices.push({
-                                "id": "<?php echo $office->id?>",
-                                "kml": "<?php echo $office->kmlfile?>"
+                                "id": "<?php echo absint($office->id)?>",
+                                "kml": "<?php echo esc_js($office->kmlfile)?>"
                             });
                 <?php } } } ?>
                 var latlng = new google.maps.LatLng(locationdev.latitude, locationdev.longitude);
@@ -145,13 +145,13 @@ function woo_delivery_lat_map_func($atts) {
                 <p><b>Nuestras sedes</b></p>
                 <?php foreach($officesFull as $office){ ?>
                     <div>
-                        <div><b><?php echo $office->name; ?></b></div>
-                        <div><?php echo $office->address; ?></div>
+                        <div><b><?php echo esc_html($office->name); ?></b></div>
+                        <div><?php echo esc_html($office->address); ?></div>
                         <?php if($office->schedules){ ?>
                             <div>Horario</div>
                             <?php foreach($office->schedules as $schedule){
                                 foreach($schedule->details as $detail) ?>
-                                <div><?php echo "Día $detail->week_day desde las $detail->start_hour hasta las $detail->end_hour" ?></div>
+                                <div><?php echo esc_html("Día $detail->week_day desde las $detail->start_hour hasta las $detail->end_hour") ?></div>
                         <?php }
                          } ?>
                     </div>
@@ -168,7 +168,7 @@ function woo_delivery_lat_map_func($atts) {
             <div style="width:100%; display:block;">
                 <h4>El restaurante mas cercano es <br/><b id="officeName"></b></h4>
                 <div style="margin: 0 auto;">
-                    <a href="#" data-url="<?php echo $atts["page"]?>" id="gotoproducts" class="button btn" style="margin: 10px;">Ver Productos</a>
+                    <a href="#" data-url="<?php echo esc_url($atts["page"] ?? "")?>" id="gotoproducts" class="button btn" style="margin: 10px;">Ver Productos</a>
                     <a href="#" class="button btn" style="margin: 10px;" onclick="jQuery('.modal').removeClass('show-modal')">Cambiar Dirección</a>
                 </div>
             </div>

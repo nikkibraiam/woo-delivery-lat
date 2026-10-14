@@ -2,7 +2,7 @@
 /**
  * WooDeliveryLat Uninstall
  *
- * Uninstalling WooDelivert deletes all data of delivery.
+ * Deletes the plugin tables and options, only when WC_REMOVE_ALL_DATA is true.
  *
  * @package WooDeliveryLat\Uninstaller
  * @version 1.0.0
@@ -20,8 +20,13 @@ if( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
     
     function woodelat_uninstall(){
-        global $wpdb, $wp_version;
-        //TODO: Agregar todas las senteción de eliminación de tablas.
+        global $wpdb;
+        // Children first because of the foreign keys.
+        foreach(array("wdlat_branch_schedule", "wdlat_schedules_details", "wdlat_branch_offices", "wdlat_schedules") as $table){
+            $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}$table");
+        }
+        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE 'woo\\_del\\_lat\\_%' OR option_name = 'woodelat_db_version'");
+        delete_metadata("user", 0, "woo_del_lat_token", "", true);
     }
     woodelat_uninstall();
 }

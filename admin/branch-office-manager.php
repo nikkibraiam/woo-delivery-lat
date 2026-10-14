@@ -12,7 +12,7 @@ $unique = (object)['id' => null, 'name' => null, 'description' => null,
 'phone' => null, 'address' => null, 'kmlfile' => null, 'state' => 0, 
 'latitude' => null, 'longitude' => null];
 if(isset($_GET["id-object"])){
-    $unique = $service->get($_GET["id-object"], true);
+    $unique = $service->get(absint($_GET["id-object"]), true);
 }
 
 ?>
@@ -20,7 +20,8 @@ if(isset($_GET["id-object"])){
 <div class="wrap">
   <h1 class="wp-heading-inline">Gestion de sucursal</h1>
   <form action="admin.php?page=woo-delivery-lat/admin/branch-office.php" method="post">
-    <input type="hidden" id="id" name="id" value="<?php echo $unique->id?>">
+    <?php wp_nonce_field("woo_del_lat_save_branch_office"); ?>
+    <input type="hidden" id="id" name="id" value="<?php echo esc_attr($unique->id)?>">
     <table class="form-table" role="presentation">
       <tbody>
         <tr class="name-branch-office">
@@ -28,7 +29,7 @@ if(isset($_GET["id-object"])){
             <label for="name">Nombre</label>
           </th>
           <td>
-            <input type="text" name="name" id="name" value="<?php echo $unique->name?>" class="regular-text" required>
+            <input type="text" name="name" id="name" value="<?php echo esc_attr($unique->name)?>" class="regular-text" required>
           </td>
         </tr>
         <tr class="description-branch-office">
@@ -36,7 +37,7 @@ if(isset($_GET["id-object"])){
             <label for="name">Descripción</label>
           </th>
           <td>
-            <input type="text" name="description" id="description" value="<?php echo $unique->description?>" class="regular-text" >
+            <input type="text" name="description" id="description" value="<?php echo esc_attr($unique->description)?>" class="regular-text" >
           </td>
         </tr>
         <tr class="phone-branch-office">
@@ -44,7 +45,7 @@ if(isset($_GET["id-object"])){
             <label for="phone">Teléfono</label>
           </th>
           <td>
-            <input type="text" name="phone" id="phone" value="<?php echo $unique->phone?>" class="regular-text" required>
+            <input type="text" name="phone" id="phone" value="<?php echo esc_attr($unique->phone)?>" class="regular-text" required>
           </td>
         </tr>
         <tr class="address-branch-office">
@@ -52,7 +53,7 @@ if(isset($_GET["id-object"])){
             <label for="address">Dirección y ciudad</label>
           </th>
           <td>
-            <input type="text" name="address" id="address" value="<?php echo $unique->address?>" class="regular-text" required>
+            <input type="text" name="address" id="address" value="<?php echo esc_attr($unique->address)?>" class="regular-text" required>
           </td>
         </tr>
         <tr class="kmlfile-branch-office">
@@ -60,14 +61,14 @@ if(isset($_GET["id-object"])){
             <label for="kmlfile">Archivo Kml de Google Maps</label>
           </th>
           <td>
-            <input type="hidden" id="kmlfile" name="kmlfile" value="<?php echo $unique->kmlfile ?>">
+            <input type="hidden" id="kmlfile" name="kmlfile" value="<?php echo esc_attr($unique->kmlfile)?>">
             <?php if($unique->kmlfile){ ?>
-              <span><a href="<?php echo get_site_url() . "/" . $unique->kmlfile ?>"><?php echo $unique->kmlfile ?></a></span><br>
+              <span><a href="<?php echo esc_url(get_site_url() . "/" . $unique->kmlfile) ?>"><?php echo esc_html($unique->kmlfile) ?></a></span><br>
             <?php }?>
             <form enctype="multipart/form-data">
               <input type="file" id="kmlfileloader" name="kmlfileloader" accept=".kml">
               <input class="save-support" name="save_support" type="button" value="Subir" onclick="loadKml(this)">
-              <img id="upload-loader" src="<?php echo get_site_url(); ?>/wp-content/plugins/woo-delivery-lat/admin/images/loader.gif" style="width: 22px; height: 22px; margin: -5px 0; display:none;"/>
+              <img id="upload-loader" src="<?php echo esc_url(WOO_DEL_LAT_URL . "admin/images/loader.gif"); ?>" style="width: 22px; height: 22px; margin: -5px 0; display:none;"/>
             </form>
             <br><small>Google maps cuenta con la posibilidad de crear las coberturas de su sucursal usando <a href="https://www.google.com/maps/d/" target="_blank">Mis Mapas Google</a>.</small>
             <br><small>En esa sección podrás dibujar el croquis de cobertura de tus servicios, descargar el archivo Kml y subirlo en esta página.</small>
@@ -78,7 +79,7 @@ if(isset($_GET["id-object"])){
           <th scope="row">Estado</th>
           <td>
             <label for="state">
-              <input name="state" type="checkbox" id="state" value="<?php echo $unique->state?>" checked='checked' />
+              <input name="state" type="checkbox" id="state" value="<?php echo esc_attr($unique->state)?>" checked='checked' />
               Activo?</label>
               <br />
           </td>
@@ -88,8 +89,8 @@ if(isset($_GET["id-object"])){
             <div>
               <h3>Esta es su ubicación y su cobertura</h3>
               <small>En el mapa muestra la cobertura del archivo KML y la dirección ingresada</small>
-              <input type="hidden" name="latitude" id="latitude" value="<?php echo $unique->latitude?>">
-              <input type="hidden" name="longitude" id="longitude" value="<?php echo $unique->longitude?>">
+              <input type="hidden" name="latitude" id="latitude" value="<?php echo esc_attr($unique->latitude)?>">
+              <input type="hidden" name="longitude" id="longitude" value="<?php echo esc_attr($unique->longitude)?>">
               <div id="map-draw" style="width: 500px; height:400px;"></div>
             </div>
           </td>
@@ -102,7 +103,7 @@ if(isset($_GET["id-object"])){
         <option value="">--Seleccione horario a agregar--</option>
         <?php if(isset($schedules)){ 
           foreach($schedules as $item){ ?>
-          <option value="<?php echo $item->id; ?>"><?php echo $item->name;?></option>
+          <option value="<?php echo absint($item->id); ?>"><?php echo esc_html($item->name);?></option>
         <?php } }?>
       </select>
       <ol id="schedules">
@@ -110,9 +111,9 @@ if(isset($_GET["id-object"])){
         if(isset($unique->schedules)){
           foreach($unique->schedules as $index => $schedule){ ?>
             <li>
-              <input class="sch-id" type="hidden" name="schedules[<?php echo $index; ?>][id]" value="<?php echo $schedule->idmain; ?>"/>
-              <input class="sch-schedule_id" type="hidden" name="schedules[<?php echo $index; ?>][schedule_id]" value="<?php echo $schedule->id; ?>"/>
-              <span class="schedule-name"><?php echo $schedule->name; ?></span>
+              <input class="sch-id" type="hidden" name="schedules[<?php echo $index; ?>][id]" value="<?php echo absint($schedule->idmain); ?>"/>
+              <input class="sch-schedule_id" type="hidden" name="schedules[<?php echo $index; ?>][schedule_id]" value="<?php echo absint($schedule->id); ?>"/>
+              <span class="schedule-name"><?php echo esc_html($schedule->name); ?></span>
               <a onclick="removeSchedule(this)"><span class="dashicons dashicons-no-alt"></span></a>
             </li>
         <?php } }?>
@@ -123,15 +124,15 @@ if(isset($_GET["id-object"])){
     </p>
   </form>
 </div>
-<script type="text/javascript" src="https://maps.google.com/maps/api/js?key=<?php echo get_option("woo_del_lat_googleKey"); ?>"></script>
+<script type="text/javascript" src="https://maps.google.com/maps/api/js?key=<?php echo esc_attr(get_option("woo_del_lat_googleKey")); ?>"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/geocodezip/geoxml3/polys/geoxml3.js"></script>
-<script type="text/javascript" src="/wp-content/plugins/woo-delivery-lat/public/js/woo-delivery-geolocation.js"></script>
+<script type="text/javascript" src="<?php echo esc_url(WOO_DEL_LAT_URL . "public/js/woo-delivery-geolocation.js"); ?>"></script>
 <script type="text/javascript">
   var locationdev = {
-    latitude: <?php echo $unique->latitude??0;?>,
-    longitude: <?php echo $unique->longitude??0;?>
+    latitude: <?php echo (float)($unique->latitude??0);?>,
+    longitude: <?php echo (float)($unique->longitude??0);?>
   }
-  var url = "<?php echo get_site_url(); ?>";
+  var url = "<?php echo esc_js(get_site_url()); ?>";
   setTimeout(function(){
     jQuery(document).ready(function(){ 
       
@@ -193,11 +194,11 @@ if(isset($_GET["id-object"])){
     var form_data = new FormData();
     form_data.append('file', file_data);
     form_data.append('action', 'woo_delivery_lat_load_kml');
-    form_data.append('supporttitle', Date.now().toString() + ".kml");
+    form_data.append('_ajax_nonce', '<?php echo wp_create_nonce("woo_del_lat_kml"); ?>');
 
     if(jQuery){
       jQuery.ajax({
-          url: '<?php echo admin_url('admin-ajax.php'); ?>',
+          url: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
           type: 'post',
           contentType: false,
           processData: false,
