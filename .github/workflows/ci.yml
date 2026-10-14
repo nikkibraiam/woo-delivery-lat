@@ -4,6 +4,7 @@ on:
   push:
     branches: [main, develop]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -25,9 +26,8 @@ jobs:
         run: find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l
 
   phpcs:
-    name: WordPress Coding Standards (report only)
+    name: WordPress Coding Standards
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -39,4 +39,4 @@ jobs:
           composer global config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
           composer global require --no-interaction wp-coding-standards/wpcs:"^3.0"
       - name: Run PHPCS
-        run: ~/.composer/vendor/bin/phpcs --standard=phpcs.xml.dist --report=summary --report-full --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 .
+        run: ~/.composer/vendor/bin/phpcs --standard=phpcs.xml.dist --report=summary --report-full .
