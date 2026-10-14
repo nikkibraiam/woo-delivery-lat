@@ -7,7 +7,7 @@
  * @package WooDeliveryLat\Uninstaller
  * @version 1.0.0
  */
-if( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
@@ -18,15 +18,15 @@ if( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
  * and to ensure only the site owner can perform this action.
  */
 if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
-    
-    function woodelat_uninstall(){
-        global $wpdb;
-        // Children first because of the foreign keys.
-        foreach(array("wdlat_branch_schedule", "wdlat_schedules_details", "wdlat_branch_offices", "wdlat_schedules") as $table){
-            $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}$table");
-        }
-        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE 'woo\\_del\\_lat\\_%' OR option_name = 'woodelat_db_version'");
-        delete_metadata("user", 0, "woo_del_lat_token", "", true);
-    }
-    woodelat_uninstall();
+
+	function woodelat_uninstall() {
+		global $wpdb;
+		// Children first because of the foreign keys.
+		foreach ( array( 'wdlat_branch_schedule', 'wdlat_schedules_details', 'wdlat_branch_offices', 'wdlat_schedules' ) as $table ) {
+			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}$table" );
+		}
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'woo\\_del\\_lat\\_%' OR option_name = 'woodelat_db_version'" );
+		delete_metadata( 'user', 0, 'woo_del_lat_token', '', true );
+	}
+	woodelat_uninstall();
 }
