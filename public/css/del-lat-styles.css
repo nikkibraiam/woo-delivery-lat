@@ -1,0 +1,21 @@
+.float-office {
+    position: fixed;
+    z-index: 1000;
+    bottom: 40%;
+    left: 10px;
+    background: hsl(0deg 0% 31%);
+    color: white;
+    width: 198px;
+    padding: 15px;
+    border-radius: 30px;
+    top: 0;
+    display: inline-table;
+}
+
+.close-btn {
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    float: right;
+    top: 10px;
+}

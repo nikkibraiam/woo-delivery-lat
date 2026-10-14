@@ -1,0 +1,61 @@
+<?php
+    defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
+
+    require_once 'services/schedule-service.php';
+
+    $service = new ScheduleService();
+    if(isset($_GET["delete"])){
+      if($_GET["delete"] == true){
+        $res = $service->delete($_GET["id-object"]);
+      }
+    }
+    
+    if(isset($_POST) && count($_POST) > 0){
+      $res = $service->save($_POST);
+    }
+    $result = $service->getList();
+    
+    if(isset($_GET["edit"]) && $_GET["edit"] == true){ 
+      require("schedule-manager.php");
+    } else { ?>
+    
+    <div class="wrap">
+      <h1 class="wp-heading-inline">Horarios</h1>
+      <a href="admin.php?page=woo-delivery-lat/admin/schedule.php&edit=true" class="page-title-action">Añadir Nuevo</a>
+      <hr class="wp-header-end">
+      <table class="wp-list-table widefat striped">
+        <thead>
+          <tr>
+            <th width="20%">ID</th>
+            <th width="20%">Name</th>
+            <th width="20%">Descripción</th>
+            <th width="20%">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php
+            if($result != null && sizeof($result) > 0){
+              foreach ($result as $print) { ?>
+                  <tr>
+                    <td width='20%'><?php echo $print->id?></td>
+                    <td width='20%'><?php echo $print->name?></td>
+                    <td width='20%'><?php echo $print->description?></td>
+                    <td width='20%'><?php echo $print->state?></td>
+                    <td width='20%'>
+                      <a href="admin.php?page=woo-delivery-lat/admin/schedule.php&edit=true&id-object=<?php echo $print->id?>">
+                      <button type='button'>Actualizar</button></a> 
+                      <a href="admin.php?page=woo-delivery-lat/admin/schedule.php&id-object=<?php echo $print->id?>&delete=true">
+                      <button type='button'>Eliminar</button></a>
+                    </td>
+                  </tr>
+              <?php
+              }
+            }else{ ?>
+              <tr><td style="text-align: center;" colspan='5'>No se han creado horarios</td></tr>
+            <?php }
+        ?>
+        </tbody>
+      </table>
+    </div>
+    
+    <?php }
